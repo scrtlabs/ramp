@@ -2,12 +2,14 @@
 name = "ramp"
 description = "A high-performance multiple-precision arithmetic library"
 version = "0.7.0"
-authors = ["James Miller <james@aatch.net>", "Michael Rosenberg <micro@fastmail.com>"]
+authors = [
+    "James Miller <james@aatch.net>",
+    "Michael Rosenberg <micro@fastmail.com>"
+]
 build = "build.rs"
 license = "Apache-2.0"
 readme = "README.md"
-keywords = ["bignum","math","number"]
-
+keywords = ["bignum", "math", "number"]
 repository = "https://github.com/Aatch/ramp"
 documentation = "https://docs.rs/ramp"
 
@@ -19,12 +21,11 @@ path = "src/lib.rs"
 unstable = [] # To keep travis-cargo happy
 fallbacks = []
 asm = []
-
 full-quickcheck = []
 
 [dependencies]
 ieee754 = "0.2"
-rand = "0.8"
+rand = { version = "0.8.5", default-features = false }
 hamming = "0.1"
 num-traits = "0.2"
 num-integer = "0.1"

@@ -41,7 +41,8 @@ mod mem;
 mod raw_vec;
 
 pub mod int;
-pub mod rational;
+#[cfg(feature = "floats")]
+mod rational;
 pub mod traits;
 
 // Re-exports

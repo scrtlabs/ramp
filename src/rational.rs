@@ -15,7 +15,6 @@
 //! This module holds `Rational` and related types.
 
 #![allow(dead_code, unused_imports)]
-
 use num_traits::{One, Zero};
 use std;
 use std::cmp::{Eq, Ord, Ordering, PartialEq, PartialOrd};

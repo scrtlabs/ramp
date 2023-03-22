@@ -54,7 +54,9 @@ pub unsafe fn num_base_digits(p: Limbs, n: i32, base: u32) -> usize {
     debug_assert!(base >= 2);
     assume(base >= 2);
 
-    if n == 0 { return 1; }
+    if n == 0 {
+        return 1;
+    }
 
     let cnt = (*p.offset((n - 1) as isize)).leading_zeros() as usize;
     let total_bits = (Limb::BITS * (n as usize)) - cnt;
@@ -73,13 +75,26 @@ pub unsafe fn num_base_digits(p: Limbs, n: i32, base: u32) -> usize {
             (total_bits + bits_per_digit - 1) / bits_per_digit
         }
     } else {
-        // Not sure if using floating-point arithmetic here is the best idea,
-        // but it should be a reasonable accurate result, maybe a little high
-        let total_bits = total_bits as f64;
+        #[cfg(feature = "floats")]
+        {
+            // Not sure if using floating-point arithmetic here is the best idea,
+            // but it should be a reasonable accurate result, maybe a little high
+            let total_bits = total_bits as f64;
 
-        let lg2b = (base as f64).log2();
-        let digits = total_bits / lg2b;
-        return digits.ceil() as usize;
+            let lg2b = (base as f64).log2();
+            let digits = total_bits / lg2b;
+            return digits.ceil() as usize;
+        }
+        #[cfg(not(feature = "floats"))]
+        {
+            // Assaf: Used this trick https://stackoverflow.com/a/72253642/1551596
+            // to drop the floating points usage. Tested it up to 1_000_000_000_000u64
+            // and it's very rarely off by 1 which sounds acceptable from the func's
+            // description above
+            let lg2b = (u64::BITS - base.leading_zeros()) as usize;
+            let digits = total_bits / lg2b;
+            return digits;
+        }
     }
 }
 
@@ -87,7 +102,9 @@ pub unsafe fn num_base_digits(p: Limbs, n: i32, base: u32) -> usize {
 pub fn base_digits_to_len(num: usize, base: u32) -> usize {
     debug_assert!(base >= 2);
 
-    if num == 0 { return 0; }
+    if num == 0 {
+        return 0;
+    }
 
     let digits_per_limb = BASES[base as usize].digits_per_limb as usize;
 
@@ -126,7 +143,7 @@ pub unsafe fn to_base<F: FnMut(u8)>(base: u32, np: Limbs, nn: i32, mut out_byte:
             bits += bits_per_digit - cnt;
         }
 
-        let mut bit_pos : isize = (bits - (nn as usize - 1) * Limb::BITS) as isize;
+        let mut bit_pos: isize = (bits - (nn as usize - 1) * Limb::BITS) as isize;
 
         let mut i = nn - 1;
         // Convert each limb by shifting and masking to get the value for each output digit
@@ -138,7 +155,9 @@ pub unsafe fn to_base<F: FnMut(u8)>(base: u32, np: Limbs, nn: i32, mut out_byte:
                 bit_pos -= bits_per_digit as isize;
             }
             i -= 1;
-            if i < 0 { break; }
+            if i < 0 {
+                break;
+            }
 
             let n0 = (n1 << ((-bit_pos) as usize)) & ((Limb(1) << bits_per_digit) - 1);
             n1 = *np.offset(i as isize);
@@ -158,19 +177,25 @@ pub unsafe fn to_base<F: FnMut(u8)>(base: u32, np: Limbs, nn: i32, mut out_byte:
     to_base_impl(0, base, np, nn, out_byte);
 }
 
-unsafe fn to_base_impl<F: FnMut(u8)>(mut len: u32, base: u32, np: Limbs, mut nn: i32, mut out_byte: F) {
+unsafe fn to_base_impl<F: FnMut(u8)>(
+    mut len: u32,
+    base: u32,
+    np: Limbs,
+    mut nn: i32,
+    mut out_byte: F,
+) {
     debug_assert!(base > 2);
 
     let buf_len = num_base_digits(np, nn, base);
-    let mut buf : Vec<u8> = vec![0; buf_len];
-    let mut r : Vec<Limb> = vec![Limb(0); (nn + 1) as usize];
+    let mut buf: Vec<u8> = vec![0; buf_len];
+    let mut r: Vec<Limb> = vec![Limb(0); (nn + 1) as usize];
     let rp = LimbsMut::new(&mut r[0], 0, r.len() as i32);
 
     ll::copy_incr(np, rp.offset(1), nn);
 
     let mut sz = 0;
 
-    let s : *mut u8 = &mut buf[0];
+    let s: *mut u8 = &mut buf[0];
     let mut s = s.offset(buf_len as isize);
 
     let base = Limb(base as ll::limb::BaseInt);
@@ -314,7 +339,7 @@ unsafe fn from_base_small(mut out: LimbsMut, mut bp: *const u8, bs: i32, base: u
     let digits_per_limb = BASES.get_unchecked(base as usize).digits_per_limb;
 
     let mut i = digits_per_limb;
-    let mut size : usize = 0;
+    let mut size: usize = 0;
     while i < (bs as u32) {
         let mut res_digit = Limb((*bp) as ll::limb::BaseInt);
         bp = bp.offset(1);

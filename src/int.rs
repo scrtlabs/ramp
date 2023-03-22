@@ -562,6 +562,7 @@ impl Int {
         }
     }
 
+    #[cfg(feature = "floats")]
     /// Computes the nearest square root `s` of this number and its remainder `r` as
     /// `Some((s, r))`, or `None` if this `Int` is negative.
     ///
@@ -874,6 +875,7 @@ impl Int {
         (self * other).abs() / self.gcd(other)
     }
 
+    #[cfg(feature = "floats")]
     /// Converts this `Int` into an `f64`.
     ///
     /// This is not an exact conversion, because this `Int` may be more precise than an `f64` can

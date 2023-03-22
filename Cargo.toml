@@ -22,6 +22,7 @@ unstable = [] # To keep travis-cargo happy
 fallbacks = []
 asm = []
 full-quickcheck = []
+floats = []
 
 [dependencies]
 ieee754 = "0.2"

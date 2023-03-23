@@ -31,6 +31,7 @@ extern crate test;
 extern crate alloc;
 extern crate core;
 extern crate hamming;
+#[cfg(feature = "floats")]
 extern crate ieee754;
 extern crate num_integer;
 extern crate num_traits;

@@ -22,10 +22,10 @@ unstable = [] # To keep travis-cargo happy
 fallbacks = []
 asm = []
 full-quickcheck = []
-floats = []
+floats = ["ieee754"]
 
 [dependencies]
-ieee754 = "0.2"
+ieee754 = { version = "0.2", optional = true }
 rand = { version = "0.8.5", default-features = false }
 hamming = "0.1"
 num-traits = { git = "https://github.com/scrtlabs/num-traits", rev = "1c3d9893d2f9dcdf872626d4e723dc88bdc03575" }

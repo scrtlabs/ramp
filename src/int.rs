@@ -890,11 +890,6 @@ impl Int {
         (self * other).abs() / self.gcd(other)
     }
 
-    #[cfg(not(feature = "floats"))]
-    pub fn to_f64(&self) -> &Self {
-        self
-    }
-
     #[cfg(feature = "floats")]
     /// Converts this `Int` into an `f64`.
     ///

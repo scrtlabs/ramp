@@ -87,15 +87,36 @@ pub unsafe fn num_base_digits(p: Limbs, n: i32, base: u32) -> usize {
         }
         #[cfg(not(feature = "floats"))]
         {
-            // Assaf: Used this trick https://stackoverflow.com/a/72253642/1551596
-            // to drop the floating points usage. Tested it up to 1_000_000_000_000u64
-            // and it's very rarely off by 1 which sounds acceptable from the func's
-            // description above
-            let lg2b = (u64::BITS - base.leading_zeros()) as usize;
+            // Assaf: Used this trick https://ethereum.stackexchange.com/a/34915/12112
+            // to drop the floating points usage
+            let lg2b = log2_floor(base) as usize;
             let digits = total_bits / lg2b;
             return digits;
         }
     }
+}
+
+fn log2_floor(num: u32) -> u8 {
+    let mut n = num;
+    let mut res: u8 = 0;
+
+    if n < 256 {
+        // At most 8 iterations
+        while n > 1 {
+            n >>= 1;
+            res += 1;
+        }
+    } else {
+        // Exactly 8 iterations
+        for s in (1..129).rev() {
+            if n >= (1 << s) {
+                n >>= s;
+                res |= s;
+            }
+        }
+    }
+
+    return res;
 }
 
 #[inline]

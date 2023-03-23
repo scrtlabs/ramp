@@ -117,6 +117,22 @@ pub struct Int {
     cap: u32,
 }
 
+pub fn u64_sqrt(y: u64) -> u64 {
+    let mut z: u64 = 0;
+    if y > 3 {
+        z = y;
+        let mut x = (y / 2) + 1;
+        while x < z {
+            z = x;
+            x = ((y / x) + x) / 2;
+        }
+    } else if y != 0 {
+        z = 1;
+    }
+
+    z
+}
+
 impl Int {
     /// Creates the `Int` that represents zero.
     pub fn zero() -> Int {
@@ -562,7 +578,6 @@ impl Int {
         }
     }
 
-    #[cfg(feature = "floats")]
     /// Computes the nearest square root `s` of this number and its remainder `r` as
     /// `Some((s, r))`, or `None` if this `Int` is negative.
     ///
@@ -579,7 +594,7 @@ impl Int {
         // f64::sqrt is rounded *up* to 67108865 precisely).
         if self < 4_503_599_761_588_224_u64 {
             let this = u64::from(&self);
-            let sqrt = (this as f64).sqrt().floor() as u64;
+            let sqrt = u64_sqrt(this);
             let rem = this - sqrt * sqrt;
 
             // reuse the memory
@@ -873,6 +888,11 @@ impl Int {
     #[inline]
     pub fn lcm(&self, other: &Int) -> Int {
         (self * other).abs() / self.gcd(other)
+    }
+
+    #[cfg(not(feature = "floats"))]
+    pub fn to_f64(&self) -> &Self {
+        self
     }
 
     #[cfg(feature = "floats")]
